@@ -58,3 +58,22 @@ This service supports proxying for the following request methods:
 - `OPTIONS`
 
 This service supports forwarding request headers, the content body, and query parameters.
+
+
+## Local Deployment to ngrok
+
+Laravel Valet comes bundled with ngrok, which allows you to expose your local services to be publicly accessible. To do this, navigate to your `laravel-gateway` service and run:
+
+```shell
+cd ~/my-valet-directory/laravel-gateway (make sure you use the directory you cloned this repo to)
+valet share
+```
+
+*NOTE: Laravel Valet installs the ngrok binary in this location:*
+```shell
+$HOME/.composer/vendor/laravel/valet/bin
+```
+*Make sure you have properly configured ngrok before using the `valet share` feature. ngrok can be setup by running:*
+```shell
+ngrok authtoken your-auth-token-goes-here
+```
