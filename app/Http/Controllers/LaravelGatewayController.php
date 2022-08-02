@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Closure;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -53,6 +54,11 @@ class LaravelGatewayController extends Controller
         $path = implode('/', array_slice($slugParts, 1));
         $path = $this->translateRouteFromConfig($service, $path);
 
+        // Check if the path override is a function or lambda
+        if (is_callable($path)) {
+            return $path($request);
+        }
+
         $urlProtocol = config('laravel-gateway.protocol');
         $urlTopLevelDomain = config('laravel-gateway.tld');
 
@@ -96,19 +102,20 @@ class LaravelGatewayController extends Controller
      * returns the overridden route. If the path has no overrides, then the
      * provided path will be returned.
      *
+     * @param string $serviceName
      * @param string $path
-     * @return string
+     * @return string|Closure
      */
-    private function translateRouteFromConfig(string $serviceName, string $path): string
+    private function translateRouteFromConfig(string $serviceName, string $path): string|Closure
     {
         $overrides = config('routes.overrides');
         if (array_key_exists($serviceName, $overrides)) {
             if (array_key_exists($path, $overrides[$serviceName])) {
                 $path = $overrides[$serviceName][$path];
             }
-        }
-        if ($path === '/') {
-            $path = '';
+            if ($path === '/') {
+                $path = '';
+            }
         }
         return $path;
     }
