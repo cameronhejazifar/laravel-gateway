@@ -51,6 +51,7 @@ class LaravelGatewayController extends Controller
         }
         $service = $slugParts[0];
         $path = implode('/', array_slice($slugParts, 1));
+        $path = $this->translateRouteFromConfig($service, $path);
 
         $urlProtocol = config('laravel-gateway.protocol');
         $urlTopLevelDomain = config('laravel-gateway.tld');
@@ -88,5 +89,27 @@ class LaravelGatewayController extends Controller
         }
 
         return response($response->body(), $response->status(), $responseHeaders);
+    }
+
+    /**
+     * Checks if there are any route overrides defined for this path and
+     * returns the overridden route. If the path has no overrides, then the
+     * provided path will be returned.
+     *
+     * @param string $path
+     * @return string
+     */
+    private function translateRouteFromConfig(string $serviceName, string $path): string
+    {
+        $overrides = config('routes.overrides');
+        if (array_key_exists($serviceName, $overrides)) {
+            if (array_key_exists($path, $overrides[$serviceName])) {
+                $path = $overrides[$serviceName][$path];
+            }
+        }
+        if ($path === '/') {
+            $path = '';
+        }
+        return $path;
     }
 }
